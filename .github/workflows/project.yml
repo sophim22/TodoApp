@@ -1,59 +1,67 @@
-name: Ionic Build and Test for iOS and Android
+name: Build Ionic Project
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  build-and-run:
-
+  build:
     runs-on: macos-latest
-
     steps:
-    # Step to checkout the repository
-    - uses: actions/checkout@v3
+      # Step 1: Check out the repository
+      - uses: actions/checkout@v3
 
-    # Step to set up Node.js environment with a compatible version
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18.19.0' # Minimum required version for Angular CLI
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.19.0'
 
-    # Step to install dependencies
-    - name: Install dependencies
-      run: npm install
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-    # Step to install Ionic CLI globally
-    - name: Install Ionic CLI
-      run: npm install -g @ionic/cli
+      # Step 4: Build the Ionic app
+      - name: Build Ionic project
+        run: ionic build
 
-    # Step to build the Ionic project
-    - name: Build Ionic project
-      run: ionic build
+      # Step 5: Add Android platform
+      - name: Add Android platform
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
 
-    # Step to sync Capacitor with iOS
-    - name: Sync Capacitor with iOS
-      run: npx cap sync ios
+      # Step 6: Sync Capacitor with Android
+      - name: Sync Capacitor with Android
+        run: npx cap sync android
 
-    # Step to install CocoaPods for iOS dependencies
-    - name: Install CocoaPods
-      run: |
-        cd ios/App
-        pod install
+      # Step 7: Build Android project
+      - name: Build Android project
+        run: |
+          cd android
+          ./gradlew assembleDebug
 
-    # TODO: - Step to build the iOS project with Xcode
+      # Step 8: Add iOS platform
+      - name: Add iOS platform
+        run: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
 
-    # Step to sync Capacitor with Android
-    - name: Sync Capacitor with Android
-      run: npx cap sync android
+      # Step 9: Sync Capacitor with iOS
+      - name: Sync Capacitor with iOS
+        run: npx cap sync ios
 
-    # Step to build the Android project
-    - name: Build Android project
-      run: |
-        cd android
-        ./gradlew assembleDebug
+      # Step 10: Install CocoaPods for iOS
+      - name: Install CocoaPods
+        run: |
+          cd ios/App
+          pod install
 
     # TODO: - Run on iOS Simulator
 
