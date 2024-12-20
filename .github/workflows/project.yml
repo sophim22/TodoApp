@@ -33,13 +33,14 @@ jobs:
     - name: Build Ionic project
       run: ionic build
 
+    # iOS-specific steps
+    # Step to add the iOS platform (if not already added)
+    - name: Add iOS platform
+      run: npx cap add ios
+
     # Step to sync Capacitor with iOS
     - name: Sync Capacitor with iOS
       run: npx cap sync ios
-
-    # Step to sync Capacitor with Android
-    - name: Sync Capacitor with Android
-      run: npx cap sync android
 
     # Step to install CocoaPods for iOS dependencies
     - name: Install CocoaPods
@@ -56,16 +57,33 @@ jobs:
                    -sdk iphoneos \
                    -allowProvisioningUpdates
 
+    # Android-specific steps
+    # Step to add the Android platform (if not already added)
+    - name: Add Android platform
+      run: npx cap add android
+
+    # Step to sync Capacitor with Android
+    - name: Sync Capacitor with Android
+      run: npx cap sync android
+
     # Step to build the Android project
     - name: Build Android project
       run: |
         cd android
         ./gradlew assembleDebug
 
-    # Step to run the Android app on an emulator
+    # Emulator steps for testing (Optional)
+    # Run on iOS Simulator
+    - name: Run on iOS Simulator
+      run: |
+        xcrun simctl boot "iPhone 14" || true
+        xcrun simctl install booted ios/App/build/Debug-iphoneos/App.app
+        xcrun simctl launch booted com.example.app # Replace with your iOS bundle identifier
+
+    # Run on Android Emulator
     - name: Run on Android Emulator
       run: |
         echo "Starting Android Emulator"
         emulator @Pixel_4_API_30 & # Replace with your emulator name
         adb install -r app/build/outputs/apk/debug/app-debug.apk
-        adb shell am start -n com.example.app/.MainActivity # Replace with your package name
+        adb shell am start -n com.example.app/.MainActivity
