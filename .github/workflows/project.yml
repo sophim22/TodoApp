@@ -1,7 +1,4 @@
-# This workflow will build a Swift project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
-
-name: Ionic iOS Build and Test
+name: Ionic Build and Test for iOS and Android
 
 on:
   push:
@@ -36,15 +33,19 @@ jobs:
     - name: Build Ionic project
       run: ionic build
 
+    # Step to sync Capacitor with iOS
+    - name: Sync Capacitor with iOS
+      run: npx cap sync ios
+
+    # Step to sync Capacitor with Android
+    - name: Sync Capacitor with Android
+      run: npx cap sync android
+
     # Step to install CocoaPods for iOS dependencies
     - name: Install CocoaPods
       run: |
         cd ios/App
         pod install
-
-    # Step to sync Capacitor with iOS
-    - name: Sync Capacitor with iOS
-      run: npx cap sync ios
 
     # Step to build the iOS project with Xcode
     - name: Build iOS project
@@ -55,9 +56,16 @@ jobs:
                    -sdk iphoneos \
                    -allowProvisioningUpdates
 
-    # Step to run the app on a simulator
-    - name: Run on iOS Simulator
+    # Step to build the Android project
+    - name: Build Android project
       run: |
-        xcrun simctl boot "iPhone 14" || true
-        xcrun simctl install booted ios/App/build/Debug-iphoneos/App.app
-        xcrun simctl launch booted com.example.app # Replace with your bundle identifier
+        cd android
+        ./gradlew assembleDebug
+
+    # Step to run the Android app on an emulator
+    - name: Run on Android Emulator
+      run: |
+        echo "Starting Android Emulator"
+        emulator @Pixel_4_API_30 & # Replace with your emulator name
+        adb install -r app/build/outputs/apk/debug/app-debug.apk
+        adb shell am start -n com.example.app/.MainActivity # Replace with your package name
