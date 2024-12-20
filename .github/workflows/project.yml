@@ -1,0 +1,68 @@
+name: Build Ionic Project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      # Step 1: Check out the repository
+      - uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.19.0'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Build the Ionic app
+      - name: Build Ionic project
+        run: ionic build
+
+      # Step 5: Add Android platform
+      - name: Add Android platform
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+
+      # Step 6: Sync Capacitor with Android
+      - name: Sync Capacitor with Android
+        run: npx cap sync android
+
+      # Step 7: Build Android project
+      - name: Build Android project
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      # Step 8: Add iOS platform
+      - name: Add iOS platform
+        run: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+
+      # Step 9: Sync Capacitor with iOS
+      - name: Sync Capacitor with iOS
+        run: npx cap sync ios
+
+      # Step 10: Install CocoaPods for iOS
+      - name: Install CocoaPods
+        run: |
+          cd ios/App
+          pod install
+
+    # TODO: - Run on iOS Simulator
+
+    # TODO: - Run on Android Emulator
