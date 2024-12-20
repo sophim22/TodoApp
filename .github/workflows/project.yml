@@ -1,0 +1,63 @@
+# This workflow will build a Swift project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+
+name: Ionic iOS Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-run:
+
+    runs-on: macos-latest
+
+    steps:
+    # Step to checkout the repository
+    - uses: actions/checkout@v3
+
+    # Step to set up Node.js environment
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16' # Ensure this matches your project requirements
+
+    # Step to install dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Step to install Ionic CLI globally
+    - name: Install Ionic CLI
+      run: npm install -g @ionic/cli
+
+    # Step to build the Ionic project
+    - name: Build Ionic project
+      run: ionic build
+
+    # Step to install CocoaPods for iOS dependencies
+    - name: Install CocoaPods
+      run: |
+        cd ios/App
+        pod install
+
+    # Step to sync Capacitor with iOS
+    - name: Sync Capacitor with iOS
+      run: npx cap sync ios
+
+    # Step to build the iOS project with Xcode
+    - name: Build iOS project
+      run: |
+        xcodebuild -workspace ios/App/App.xcworkspace \
+                   -scheme App \
+                   -configuration Debug \
+                   -sdk iphoneos \
+                   -allowProvisioningUpdates
+
+    # Step to run the app on a simulator
+    - name: Run on iOS Simulator
+      run: |
+        xcrun simctl boot "iPhone 14" || true
+        xcrun simctl install booted ios/App/build/Debug-iphoneos/App.app
+        xcrun simctl launch booted com.example.app # Replace with your bundle identifier
