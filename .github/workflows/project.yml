@@ -1,0 +1,60 @@
+name: Ionic Build and Test for iOS and Android
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-run:
+
+    runs-on: macos-latest
+
+    steps:
+    # Step to checkout the repository
+    - uses: actions/checkout@v3
+
+    # Step to set up Node.js environment with a compatible version
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.19.0' # Minimum required version for Angular CLI
+
+    # Step to install dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Step to install Ionic CLI globally
+    - name: Install Ionic CLI
+      run: npm install -g @ionic/cli
+
+    # Step to build the Ionic project
+    - name: Build Ionic project
+      run: ionic build
+
+    # Step to sync Capacitor with iOS
+    - name: Sync Capacitor with iOS
+      run: npx cap sync ios
+
+    # Step to install CocoaPods for iOS dependencies
+    - name: Install CocoaPods
+      run: |
+        cd ios/App
+        pod install
+
+    # TODO: - Step to build the iOS project with Xcode
+
+    # Step to sync Capacitor with Android
+    - name: Sync Capacitor with Android
+      run: npx cap sync android
+
+    # Step to build the Android project
+    - name: Build Android project
+      run: |
+        cd android
+        ./gradlew assembleDebug
+
+    # TODO: - Run on iOS Simulator
+
+    # TODO: - Run on Android Emulator
