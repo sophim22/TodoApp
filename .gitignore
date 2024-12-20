@@ -70,10 +70,8 @@ testem.log
 Thumbs.db
 
 # Capacitor platforms
-android/
-ios/
+/android
+/ios
 
 # IDE files
 .vscode/
-
-git rm -r --cached node_modules/ android/ ios/ www/
