@@ -19,12 +19,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.18.1'  # Update to a compatible Node.js version
+          node-version: '20.18.1'
 
-      # Step to Install Yarn and Angular CLI
-      - name: Install Yarn and Angular CLI
+      # Step to Install Yarn, Angular CLI, and Ionic CLI
+      - name: Install Yarn, Angular CLI, and Ionic CLI
         run: |
-          npm install -g yarn @angular/cli
+          npm install -g yarn @angular/cli @ionic/cli
 
       # Step to Install dependencies
       - name: Install dependencies
