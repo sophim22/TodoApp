@@ -25,9 +25,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Step to install Ionic CLI globally
-      - name: Install Ionic CLI
-        run: npm install -g @ionic/cli
+      # Step to Ensure Angular Devkit and Karma dependencies are installed
+      - name: Install Angular Devkit and Karma
+        run: |
+          npm install @angular-devkit/build-angular karma --save-dev
+
+      # Step to Run Karma tests
+      - name: Run Karma tests
+        run: |
+          npx karma start --single-run --browsers Chrome
 
       # Step to Build the Ionic app
       - name: Build Ionic project
@@ -66,7 +72,3 @@ jobs:
         run: |
           cd ios/App
           pod install
-
-    # TODO: - Run on iOS Simulator
-
-    # TODO: - Run on Android Emulator
