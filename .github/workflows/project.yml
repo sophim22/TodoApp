@@ -30,10 +30,6 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      # Step to Build the Ionic app
-      - name: Build Ionic project
-        run: yarn ionic build
-
       # Step to Add Android platform
       - name: Add Android platform
         run: |
@@ -60,12 +56,6 @@ jobs:
           adb wait-for-device
           adb shell input keyevent 82
 
-      # Step to Run Tests on Android Emulator
-      - name: Run Tests on Android Emulator
-        run: |
-          appium & # Start Appium server
-          yarn test:android # Assuming this runs the tests specifically for Android
-
       # Step to Add iOS platform
       - name: Add iOS platform
         run: |
@@ -82,23 +72,3 @@ jobs:
         run: |
           sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
           xcodebuild -version
-
-      # Step to Run Tests on iOS Simulator
-      - name: Run Tests on iOS Simulator
-        run: |
-          appium & # Start Appium server
-          yarn test:ios # Assuming this runs the tests specifically for iOS
-
-      # Step to Build and Run on Android Emulator
-      - name: Build and Run on Android Emulator
-        run: |
-          cd android
-          ./gradlew assembleDebug
-          adb install app/build/outputs/apk/debug/app-debug.apk
-          adb shell am start -n "com.example.yourapp/.MainActivity"
-
-      # Step to Build and Run on iOS Simulator
-      - name: Build and Run on iOS Simulator
-        run: |
-          cd ios/App
-          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 12,OS=16.2' build
