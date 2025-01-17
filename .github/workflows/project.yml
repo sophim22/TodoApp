@@ -15,6 +15,10 @@ jobs:
       # Step to Check out the repository
       - uses: actions/checkout@v3
 
+      # Step to Install Yarn globally
+      - name: Install Yarn globally
+        run: npm install -g yarn
+
       # Step to Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -35,7 +39,7 @@ jobs:
         run: |
           npx karma start --single-run --browsers Chrome
 
-      # Step to Build the Ionic app
+      # Step to Build the Ionic project
       - name: Build Ionic project
         run: ionic build
 
