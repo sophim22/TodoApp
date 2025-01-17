@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   build:
     runs-on: macos-latest
@@ -19,56 +18,46 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.18.1'
-
-      # Step to Install Yarn, Angular CLI, and Ionic CLI
-      - name: Install Yarn, Angular CLI, and Ionic CLI
-        run: |
-          npm install -g yarn @angular/cli @ionic/cli
+          node-version: '18.19.0'
 
       # Step to Install dependencies
       - name: Install dependencies
-        run: yarn install
+        run: npm install
+
+      # Step to Build the Ionic app
+      - name: Build Ionic project
+        run: ionic build
 
       # Step to Add Android platform
       - name: Add Android platform
         run: |
           if [ ! -d "android" ]; then
-            yarn cap add android
+            npx cap add android
           fi
 
       # Step to Sync Capacitor with Android
       - name: Sync Capacitor with Android
-        run: yarn cap sync android
+        run: npx cap sync android
 
-      # Step to Set up Android Emulator
-      - name: Set up Android environment
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 30
-          target: default
-          arch: x86_64
-
-      # Step to Start Android Emulator
-      - name: Start Android Emulator
+      # Step to Build Android project
+      - name: Build Android project
         run: |
-          emulator -avd test -no-window -no-audio -gpu swiftshader &
-          adb wait-for-device
-          adb shell input keyevent 82
+          cd android
+          ./gradlew assembleDebug
 
       # Step to Add iOS platform
       - name: Add iOS platform
         run: |
           if [ ! -d "ios" ]; then
-            yarn cap add ios
+            npx cap add ios
           fi
 
       # Step to Sync Capacitor with iOS
       - name: Sync Capacitor with iOS
-        run: yarn cap sync ios
+        run: npx cap sync ios
 
-      # Step to Set up Xcode environment
-      - name: Set up Xcode environment
+      # Step to Install CocoaPods for iOS
+      - name: Install CocoaPods
         run: |
-          sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
-          xcodebuild -version
+          cd ios/App
+          pod install
