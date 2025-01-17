@@ -19,11 +19,11 @@ jobs:
       - name: Install Yarn globally
         run: npm install -g yarn
 
-      # Step to Set up Node.js
+      # Step to Set up Node.js with a compatible version
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.19.0'
+          node-version: '18.19.1'  # Use a compatible version (>=18.19.1)
 
       # Step to Remove node_modules and package-lock.json to use Yarn
       - name: Clean npm cache and install dependencies with Yarn
