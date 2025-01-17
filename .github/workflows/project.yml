@@ -15,66 +15,90 @@ jobs:
       # Step to Check out the repository
       - uses: actions/checkout@v3
 
-      # Step to Install Yarn globally
-      - name: Install Yarn globally
-        run: npm install -g yarn
-
       # Step to Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.19.0'
+          node-version: '18.19.1'
 
-      # Step to Remove node_modules and package-lock.json to use Yarn
-      - name: Clean npm cache and install dependencies with Yarn
+      # Step to Install Yarn and Angular CLI
+      - name: Install Yarn and Angular CLI
         run: |
-          rm -rf node_modules package-lock.json
-          yarn install --legacy-peer-deps
+          npm install -g yarn @angular/cli
 
-      # Step to Ensure Angular Devkit and Karma dependencies are installed
-      - name: Install Angular Devkit and Karma with Yarn
-        run: |
-          yarn add @angular-devkit/build-angular karma --dev
+      # Step to Install dependencies
+      - name: Install dependencies
+        run: yarn install
 
-      # Step to Run Karma tests
-      - name: Run Karma tests
-        run: |
-          npx karma start --single-run --browsers Chrome
-
-      # Step to Build the Ionic project
+      # Step to Build the Ionic app
       - name: Build Ionic project
-        run: ionic build
+        run: yarn ionic build
 
       # Step to Add Android platform
       - name: Add Android platform
         run: |
           if [ ! -d "android" ]; then
-            npx cap add android
+            yarn cap add android
           fi
 
       # Step to Sync Capacitor with Android
       - name: Sync Capacitor with Android
-        run: npx cap sync android
+        run: yarn cap sync android
 
-      # Step to Build Android project
-      - name: Build Android project
+      # Step to Set up Android Emulator
+      - name: Set up Android environment
+        uses: android-actions/setup-android@v2
+        with:
+          api-level: 30
+          target: default
+          arch: x86_64
+
+      # Step to Start Android Emulator
+      - name: Start Android Emulator
         run: |
-          cd android
-          ./gradlew assembleDebug
+          emulator -avd test -no-window -no-audio -gpu swiftshader &
+          adb wait-for-device
+          adb shell input keyevent 82
+
+      # Step to Run Tests on Android Emulator
+      - name: Run Tests on Android Emulator
+        run: |
+          appium & # Start Appium server
+          yarn test:android # Assuming this runs the tests specifically for Android
 
       # Step to Add iOS platform
       - name: Add iOS platform
         run: |
           if [ ! -d "ios" ]; then
-            npx cap add ios
+            yarn cap add ios
           fi
 
       # Step to Sync Capacitor with iOS
       - name: Sync Capacitor with iOS
-        run: npx cap sync ios
+        run: yarn cap sync ios
 
-      # Step to Install CocoaPods for iOS
-      - name: Install CocoaPods
+      # Step to Set up Xcode environment
+      - name: Set up Xcode environment
+        run: |
+          sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+
+      # Step to Run Tests on iOS Simulator
+      - name: Run Tests on iOS Simulator
+        run: |
+          appium & # Start Appium server
+          yarn test:ios # Assuming this runs the tests specifically for iOS
+
+      # Step to Build and Run on Android Emulator
+      - name: Build and Run on Android Emulator
+        run: |
+          cd android
+          ./gradlew assembleDebug
+          adb install app/build/outputs/apk/debug/app-debug.apk
+          adb shell am start -n "com.example.yourapp/.MainActivity"
+
+      # Step to Build and Run on iOS Simulator
+      - name: Build and Run on iOS Simulator
         run: |
           cd ios/App
-          pod install
+          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 12,OS=16.2' build
